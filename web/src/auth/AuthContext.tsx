@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import { trackEvent } from "../analytics/pendo";
 import { authApi, type Account, type User } from "../api/auth";
 import { clearSession, readSession, saveSession } from "./session";
 
@@ -21,6 +22,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const signedIn = await authApi.signIn(email, password);
     saveSession(signedIn);
     setSession(signedIn);
+    // The API accepted the credentials and the session is saved.
+    trackEvent("Signed in", {
+      user_role: signedIn.user.role,
+      account_plan: signedIn.account.plan,
+    });
   }, []);
 
   const signOut = useCallback(async () => {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { trackEvent } from "../analytics/pendo";
 import { tripsApi, type NewTrip, type Trip } from "../api/trips";
 import { TripForm } from "../components/TripForm";
 
@@ -21,6 +22,11 @@ export function EditTripPage() {
     try {
       setError(null);
       await tripsApi.update(tripId, changes);
+      // The API saved the trip's changes, before going back to the trip list.
+      trackEvent("Trip updated", {
+        trip_id: tripId,
+        travelers: changes.travelers,
+      });
       navigate("/trips");
     } catch (e) {
       setError((e as Error).message);
